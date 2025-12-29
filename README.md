@@ -1,7 +1,7 @@
 # 🚀 Customer Segmentation API
 
 🌐 **Live Frontend Demo:**
-👉 [https://junaidariie.github.io/junaid17-customer-segmentation/](https://junaidariie.github.io/junaid17-customer-segmentation/)
+👉 https://junaidariie.github.io/customer-segmentation/
 
 > ⚡ **Note:** The frontend UI for this project is **AI-generated** and serves as a clean, interactive interface for demonstrating the backend capabilities. The core focus of this project is the **machine learning pipeline, API design, and deployment architecture**.
 
