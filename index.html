@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Customer Segmentation AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* --- Variables & Global --- */
+:root {
+    --bg-dark: #0a0a0a;
+    --card-bg: #161616;
+    --input-bg: #1f1f1f;
+    --border-color: #333333;
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --accent: #8b5cf6; /* Violet accent */
+    --text-main: #ededed;
+    --text-muted: #a1a1aa;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-dark);
+    /* Subtle grid pattern */
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    padding: 1.5rem 1rem;
+    line-height: 1.6;
+}
+
+/* --- Layout & Animation --- */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+/* --- Components --- */
+.section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.section-card:hover {
+    border-color: #444;
+}
+
+/* Header */
+.header-container {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.header-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(to right, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+/* Alerts */
+.alert-banner {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    color: #fef08a;
+    padding: 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    justify-content: center;
+}
+
+/* Forms */
+.form-grid {
+    display: grid;
+    /* Improved for responsiveness: min width 260px avoids squashed inputs */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 1rem; /* Larger touch target */
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    background: #252525;
+}
+
+/* Button */
+.analyze-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.analyze-btn:not(:disabled) {
+    animation: pulse-glow 2s infinite;
+}
+
+.analyze-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.analyze-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    background: #333;
+    box-shadow: none;
+}
+
+/* Results */
+.result-section {
+    display: none;
+    margin-top: 2rem;
+}
+
+.result-section.show {
+    display: block;
+    animation: slideUpFade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.cluster-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ddd6fe;
+    margin-top: 0.5rem;
+}
+
+.cluster-id {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    padding: 0.25rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.insight-card {
+    background: #111;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+}
+
+.insight-title {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insight-content {
+    color: var(--text-main);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+/* Loaders & Messages */
+.dots-loader { display: flex; gap: 4px; }
+.dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+.error-message { 
+    background: rgba(239, 68, 68, 0.2); 
+    color: #fca5a5; 
+    border: 1px solid #b91c1c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    display: none;
+    text-align: center;
+}
+
+.footer { text-align: center; color: #52525b; font-size: 0.85rem; margin-top: 4rem; opacity: 0.8; }
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+    .header-title { font-size: 1.8rem; }
+    .section-card { padding: 1.25rem; }
+    .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .insight-grid { grid-template-columns: 1fr; }
+    
+    /* Ensure inputs don't zoom on iOS */
+    .form-group input { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-container">
+        <h1 class="header-title">👥 Customer AI</h1>
+        <p class="header-subtitle">Intelligent Segmentation & Personalization</p>
+    </div>
+
+    <div class="alert-banner">
+        <span>⚠️</span>
+        <div><strong>Note:</strong> First prediction may take ~45 seconds due to API cold start.</div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">📊 Customer Data Profile</div>
+        <form id="predictionForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" 
+                           min="18" max="100" required 
+                           value="45" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="income">Annual Income ($)</label>
+                    <input type="number" id="income" name="income" 
+                           min="0" max="200000" required 
+                           value="75000" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="totalSpendings">Total Spendings ($)</label>
+                    <input type="number" id="totalSpendings" name="totalSpendings" 
+                           min="0" max="5000" required 
+                           value="1200" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="webPurchases">Web Purchases (Count)</label>
+                    <input type="number" id="webPurchases" name="webPurchases" 
+                           min="0" max="100" required 
+                           value="12" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="storePurchases">Store Purchases (Count)</label>
+                    <input type="number" id="storePurchases" name="storePurchases" 
+                           min="0" max="100" required 
+                           value="5" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="webVisits">Web Visits (Per Month)</label>
+                    <input type="number" id="webVisits" name="webVisits" 
+                           min="0" max="50" required 
+                           value="8" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="recency">Recency (Days since last purchase)</label>
+                    <input type="number" id="recency" name="recency" 
+                           min="0" max="365" required 
+                           value="15" inputmode="numeric">
+                </div>
+            </div>
+
+            <button type="submit" class="analyze-btn" id="predictBtn">
+                🚀 Predict Customer Segment
+            </button>
+        </form>
+        <div class="error-message" id="error"></div>
+    </div>
+
+    <div class="result-section" id="resultSection">
+        <div class="result-header">
+            <span class="cluster-id" id="clusterId">Cluster --</span>
+            <div class="cluster-name" id="clusterName">--</div>
+        </div>
+        
+        <div class="insight-grid">
+            <div class="insight-card">
+                <div class="insight-title">📝 Segment Profile</div>
+                <div class="insight-content" id="description">--</div>
+            </div>
+            
+            <div class="insight-card" style="border-left: 3px solid var(--accent);">
+                <div class="insight-title">💡 Strategic Recommendation</div>
+                <div class="insight-content" id="recommendation">--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>👥 Customer AI © 2025 | Powered by Machine Learning</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('predictionForm');
+        const predictBtn = document.getElementById('predictBtn');
+        const errorDiv = document.getElementById('error');
+        const resultSection = document.getElementById('resultSection');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset UI
+            errorDiv.style.display = 'none';
+            resultSection.classList.remove('show');
+            
+            // Loading State
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<div class="dots-loader"><div class="dot" style="background:white"></div><div class="dot" style="background:white"></div></div> Analyzing...';
+
+            try {
+                // Get form data
+                const formData = new FormData(form);
+                const inputData = {
+                    Age: parseInt(formData.get('age')),
+                    Income: parseInt(formData.get('income')),
+                    Total_Spendings: parseInt(formData.get('totalSpendings')),
+                    NumWebPurchases: parseInt(formData.get('webPurchases')),
+                    NumStorePurchases: parseInt(formData.get('storePurchases')),
+                    NumWebVisitsMonth: parseInt(formData.get('webVisits')),
+                    Recency: parseInt(formData.get('recency'))
+                };
+
+                // API Call
+                const response = await fetch('https://junaid17-customer-segmentation-api.hf.space/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(inputData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Populate Results
+                document.getElementById('clusterId').textContent = `Cluster ${result.cluster_id}`;
+                document.getElementById('clusterName').textContent = result.cluster_name;
+                document.getElementById('description').textContent = result.description;
+                document.getElementById('recommendation').textContent = result.recommendation;
+
+                // Show Results with Animation
+                resultSection.style.display = 'block';
+                // Small delay to allow display:block to render before adding class for animation
+                setTimeout(() => {
+                    resultSection.classList.add('show');
+                    // Smooth scroll to results
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 10);
+
+            } catch (err) {
+                console.error('Prediction error:', err);
+                errorDiv.textContent = `❌ Error: ${err.message || 'Failed to connect to AI server.'}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                // Reset Button
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '🚀 Predict Customer Segment';
+            }
+        });
+
+        // Add input validation visuals
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const min = parseInt(this.min);
+                const max = parseInt(this.max);
+                const value = parseInt(this.value);
+                
+                if (value < min || value > max) {
+                    this.style.borderColor = '#ef4444'; // Red error color
+                } else {
+                    this.style.borderColor = '#333333'; // Default border color
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
